@@ -1,0 +1,154 @@
+@font-face {
+    font-family: lobster;
+    src: url("Lobster_1.3.otf")format("opentype");
+    font-weight: bold;
+  }
+
+
+
+body{
+    font-family: lobster;
+    margin: center;
+    background-color: #89bee7d3;
+}
+.menu_bar{
+    background-color: #0082e6;
+    height:80px;
+    width:100%;
+
+}
+label.logo{
+    color:white;
+    font-size:35px;
+    line-height:80px;
+    font-family: lobster;
+
+}
+
+.menu_bar nav ul{
+    float:right;
+    margin-right: 20px;
+
+}
+.menu_bar nav ul li{
+    display: inline-block;
+   
+    line-height: 80px;
+    margin:0 10px;
+
+}
+.menu_bar nav ul li a{
+    color:white;
+    font-size:25px;
+    text-transform:uppercase;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+.menu_bar a.active,a:hover{
+    background-color: #1b9bff;
+    transition: .5s;
+}
+.menu_bar nav ul li a img{
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+}
+.checkbtn{
+    font-size :30px;
+    color: white;
+    float:right;
+    line-height:80px;
+    margin-right: 40px;
+    cursor : pointer;
+    display: none;
+
+}
+#check{
+    display:none;
+}
+@media(max-width:952px){
+    label.logo{
+
+        font-size:30px;
+        padding-left: 50px;
+    }
+    nav ul li a{
+        font-size :16px;
+    }
+}
+@media(max-width:890px){
+    .checkbtn{
+        display:block;
+    }
+    .menu_bar nav ul{
+        position:fixed;
+        width:100%;
+        height:100vh;
+        background: #2c3e50;
+        top: 80px;
+        left:-100%;
+        text-align:center;
+        transition:all .5s;
+        z-index:1;
+    }
+    .menu_bar nav ul li{
+        display:block;
+    }
+    .menu_bar nav ul li a{
+        font-size:20px;
+    }
+    .menu_bar a.active,a:hover{
+        background:none;
+        transition: .5s;
+    }
+    #check:checked ~ ul{
+        left:0;
+        
+        
+    }
+}
+.abc img{
+    position: absolute;
+    width:"100px" ;
+    height:"100px";
+    
+}
+
+
+.slidecontainer {
+    width: 100%; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 100%; /* Full-width */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #fa3466; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #fa3466; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
