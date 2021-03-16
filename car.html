@@ -185,14 +185,14 @@
           console.log(mode);
          if(turn){
             if(mode === 0){
-              car.position.x -= 40 * speed;
+              car.position.x -=100 * clock.getDelta();
               if(car.position.x <= -200){
                 mode = 1;
                 angle = Math.PI / 2;
               }
             }
             if(mode === 1){
-              angle += Math.PI / 3 *speed;
+              angle += Math.PI / 1 * clock.getDelta();
               car.rotation.y = angle;
               car.position.set (50*Math.cos(angle) - 200 ,0,50*-Math.sin(angle) + 50);
             
@@ -201,13 +201,13 @@
               }
             }
             if(mode === 2){
-              car.position.x += 40 * speed;
+              car.position.x += 100* clock.getDelta();
               if(car.position.x >= 0){
                 mode = 3;
               }
             }
             if(mode === 3){
-              angle += Math.PI / 3 *speed;
+              angle += Math.PI / 1 * clock.getDelta();
               car.rotation.y = angle;
               car.position.set (50*Math.cos(angle),0,50*-Math.sin(angle) + 50);
             
