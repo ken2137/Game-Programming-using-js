@@ -39,7 +39,7 @@
         import { OBJLoader } from 'https://unpkg.com/three/examples/jsm/loaders/OBJLoader.js';
         
         var camera, scene, renderer,clock,car,dt;
-        var  angle = 0, raidus = 200, speed = 0.002, nowPos;
+        var  angle = 0, raidus = 200, speed = 0.02, nowPos;
         var turn = false;
         var toggle;
         var mode = 1;
@@ -185,14 +185,14 @@
           console.log(mode);
          if(turn){
             if(mode === 0){
-              car.position.x -= 40 * clock.getDelta();
+              car.position.x -= 40 * speed;
               if(car.position.x <= -200){
                 mode = 1;
                 angle = Math.PI / 2;
               }
             }
             if(mode === 1){
-              angle += Math.PI / 3 * clock.getDelta();
+              angle += Math.PI / 3 *speed;
               car.rotation.y = angle;
               car.position.set (50*Math.cos(angle) - 200 ,0,50*-Math.sin(angle) + 50);
             
@@ -201,13 +201,13 @@
               }
             }
             if(mode === 2){
-              car.position.x += 40 * clock.getDelta();
+              car.position.x += 40 * speed;
               if(car.position.x >= 0){
                 mode = 3;
               }
             }
             if(mode === 3){
-              angle += Math.PI / 3 * clock.getDelta();
+              angle += Math.PI / 3 *speed;
               car.rotation.y = angle;
               car.position.set (50*Math.cos(angle),0,50*-Math.sin(angle) + 50);
             
