@@ -1,0 +1,164 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<style>
+#heading{
+ position:absolute;
+ text-align:center;
+ width:100vw;
+}
+</style> 
+</head>
+<body> 
+<!--<script src="https://threejs.org/build/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script> -->
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://threejs.org/build/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/104/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
+
+
+<div id='heading'>
+ <h1 style ='color:white'>Game Physics</h1>
+ <button id="soundButton">
+	打開聲音
+</button>
+</div>
+<audio id="collisionsound" style="display:none" muted>
+	<source src="https://jyunming-chen.github.io/game3js/gameHWhelpers/sounds/collision3.wav" type='audio/wav'>
+</audio>
+
+
+
+<script type ="module">
+javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='https://mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+
+import * as THREE from 'https://unpkg.com/three/build/three.module.js';
+import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/OrbitControls.js';
+
+// my script
+var renderer, camera, scene; 
+var angle = 0;
+var sound 
+var soundFlag = false;
+var pucks = [];
+
+$('#soundButton').click(function($event){
+	if(!soundFlag){
+		sound.muted = false;
+		$('#soundButton').text('關閉聲音');
+	}
+	else {
+		sound.muted = true;
+		$('#soundButton').text('打開聲音');
+	}
+
+	soundFlag = !soundFlag;
+})
+
+class Puck{
+	constructor(position){
+		this.speed = Math.random() * 3 + 2;
+		this.r = Math.random() * 10 + 5;
+		this.direction = new THREE.Vector3(Math.random() * 2 - 1, 0, Math.random() * 2 - 1).normalize();
+
+		this.body = this.buildPuck();
+		this.body.position.copy(position.clone());
+
+		scene.add(this.body);
+	}
+
+	buildPuck(){
+		let body = new THREE.Object3D();
+		let color = new THREE.Color().setRGB(Math.random(),Math.random(),Math.random());
+		let puck = new THREE.Mesh(new THREE.CylinderGeometry(this.r,this.r,4,32), new THREE.MeshBasicMaterial({color: color}));
+		puck.position.y = 2;
+
+		let light = new THREE.PointLight(color);
+		light.position.y = 10;
+
+		body.add(puck, light);
+		return body;
+	}
+
+	move(){
+		let nowPosition = this.body.position.clone();
+		nowPosition.add(this.direction.clone().multiplyScalar(this.speed));
+		
+		if(nowPosition.x + this.r > 250 || nowPosition.x - this.r < -250){
+			this.direction.x *= -1;
+			sound.play();
+		}
+		if(nowPosition.z + this.r > 250 || nowPosition.z - this.r < -250){
+			this.direction.z *= -1;
+			sound.play();
+		}
+
+		this.body.position.copy(nowPosition);
+	}
+
+	hit(anotherPuck){
+		let dis = anotherPuck.body.position.clone().sub(this.body.position.clone());
+		if(dis.length() < this.r + anotherPuck.r){
+			sound.play();
+			this.direction.copy(dis.clone().multiplyScalar(-1).normalize());
+			anotherPuck.direction.copy(dis.clone().normalize());
+		}
+	}
+}
+
+init(); 
+animate(); 
+
+function init() { 
+	
+	sound = document.getElementById('collisionsound');
+
+	scene = new THREE.Scene();
+	renderer = new THREE.WebGLRenderer ({antialias: true}); 
+	renderer.setSize (window.innerWidth,window.innerHeight); 
+	renderer.setClearColor (0x000000); 
+	document.body.appendChild (renderer.domElement); 
+
+	camera = new THREE.PerspectiveCamera (100, window.innerWidth/window.innerHeight, 1, 1000);
+	camera.position.set (0,400,500); 
+	var controls = new OrbitControls (camera, renderer.domElement);
+
+	/////////////////////////////////////////////////////////////////
+	
+	var wall = new THREE.Mesh (new THREE.BoxGeometry(500,50, 500), new THREE.MeshBasicMaterial({color:"gray", transparent: true, opacity:0.6}));
+    scene.add(wall);
+    wall.position.y = 20;
+	var floor = new THREE.Mesh (new THREE.PlaneGeometry(500,500), new THREE.MeshPhongMaterial());
+    floor.rotation.x = -Math.PI/2;
+    scene.add (floor);
+	
+	for(let i = 0; i < 10; i++)
+		pucks.push(new Puck(getInitRandomPos(),0,getInitRandomPos()));
+}
+
+function getInitRandomPos(){
+	return new THREE.Vector3(Math.random() * 400 - 200, 0, Math.random() * 400 - 200);
+}
+
+function animate() { 
+
+	for(let i = 0; i < pucks.length; i++){
+		pucks[i].move();
+	}
+
+	for(let i = 0; i < pucks.length; i++){
+		for(let j = i + 1; j < pucks.length; j++){
+			pucks[i].hit(pucks[j]);
+		}
+	}
+	
+	renderer.render (scene, camera); 
+	requestAnimationFrame( animate ); 
+
+}
+
+
+</script> 
+
+</body>
