@@ -143,6 +143,26 @@
             let dis = pick_2.body.position.clone().sub(pick_1.body.position.clone());
             if(dis.length() < pick_1.r + pick_2.r){
                     
+                    let x1 = pick_1.body.position.clone();
+                    let x2 = pick_2.body.position.clone();
+                    
+                    let v1 = pick_1.direction.clone().multiplyScalar(pick_1.speed);
+                    let v2 = pick_2.direction.clone().multiplyScalar(pick_2.speed);
+                    
+                    let n1 = v1.clone().sub(v2.clone()).dot(x1.clone().sub(x2.clone()));
+                    let len1 = x1.clone().sub(x2.clone()).length() ** 2;
+                    let newV1 = v1.clone().sub(x1.clone().sub(x2.clone()).multiplyScalar(n1 / len1));
+                    
+                    let n2 = v2.clone().sub(v1.clone()).dot(x2.clone().sub(x1.clone()));
+                    let len2 = x2.clone().sub(x1.clone()).length() ** 2;
+                    let newV2 = v2.clone().sub(x2.clone().sub(x1.clone()).multiplyScalar(n2 / len2));
+                    
+                    pick_1.speed = newV1.clone().length();
+                    pick_1.direction = newV1.clone().normalize();
+                    
+                    pick_2.speed = newV2.clone().length();
+                    pick_2.direction = newV2.clone().normalize();
+                    
                     pick_1.direction.copy(dis.clone().multiplyScalar(-1).normalize());
                     pick_2.direction.copy(dis.clone().normalize());
                     sound.play();
