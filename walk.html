@@ -38,7 +38,7 @@
 <script src="https://threejs.org/build/three.min.js"></script>
 
 <div id='heading'>
- <h1 style ='color:white'>Steve</h1>
+ <h1 style ='color:white'>Steve 'S' walk</h1>
  <button  id = "Gyro" style = "padding: 15px 32px;">Gyro</button>
 </div>
 
@@ -507,20 +507,22 @@ function onWindowResize() {
 }
 
 function animate() { 
-	
 	let R = 50; //半徑
 	let omega = 12/50/T;  
 	let dt = clock.getDelta();
 	let intKey = keyframe(clock.getElapsedTime());
 	
 	theta += omega*dt*8;
-	let count = theta/ (2*Math.PI);
+	let count = theta/ (Math.PI);
 	
 	//move
-	
+	if( count%2  < 1){
 		steve.move(new THREE.Vector3(R*Math.cos(Math.PI - theta)-50, 0, -R*Math.sin(Math.PI - theta)), Math.PI - theta, intKey[0], intKey[1]);
-	
-	
+	}
+	else {
+		theta += omega*dt*4;
+		steve.move(new THREE.Vector3(R/2*Math.cos(theta)+25, 0, -R/2*Math.sin(theta)), Math.PI + theta, intKey[0], intKey[1]);
+	}
 
 	//
 	if(personview == true) steve.look3PV(4);
