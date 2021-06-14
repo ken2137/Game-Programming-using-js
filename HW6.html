@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#heading{
+	text-align: center;
+	position:absolute;
+	width:100vw;
+}
+</style>
+</head>
+<body style='overflow:hidden'> 
+
+<div id='heading'>
+	<h3 style = "color:red">Homework 6<br></h3>
+</div>
+
+<script src="https://threejs.org/build/three.min.js"></script>
+<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+
+<script type ="module">
+class Point {
+   constructor (x,y) {
+   	this.x = x;
+   	this.y = y;
+   }
+}
+
+class BSPNode {
+   constructor (p1, p2) {
+      this.coeff = [-(p2.y - p1.y), p2.x - p1.x, p1.x*p2.y - p2.x*p1.y];
+      // for distance computation, need to be normalized
+      let factor = Math.sqrt(this.coeff[0]*this.coeff[0] + this.coeff[1]*this.coeff[1]);
+      this.coeff[0] /= factor;
+      this.coeff[1] /= factor;
+      this.coeff[2] /= factor;
+      
+      this.p1 = p1;
+      this.p2 = p2;
+      this.leftChild = null;
+      this.rightChild = null;
+   }
+   break (p) {
+     let newLine = new BSPNode (p, this.p2); // the new line
+     this.p2 = p;  // the original line
+   	 return newLine;   	 
+   }
+   
+   setLeftChild (node) {
+      this.leftChild = node;
+   }
+   setRightChild (node) {
+      this.rightChild = node;
+   }
+}
+
+var camera, scene, renderer;
+var keyboard;
+var RR,tree,pawn;
+var state = 0;
+
+init();
+animate();
+
+function make3JSLoop() {
+  let points = [];
+  for (let i = 0; i < arguments.length; i++)
+     points.push (new THREE.Vector3(arguments[i].x, arguments[i].y, 0));
+  
+  var geometry = new THREE.BufferGeometry();
+  geometry.setFromPoints (points);
+  var border = new THREE.Line(geometry, new THREE.LineBasicMaterial({
+    color: 0x0000ff
+  }));
+  scene.add(border);
+}
+
+function buildTree () {
+  // outer wall
+  let A = new Point (2,1);
+  let B = new Point (7,3);
+  let C = new Point (5,6);
+  let D = new Point (0,5);
+  
+  make3JSLoop (A,B,C,D,A);    
+
+  // inner wall
+  let E = new Point (2,3);
+  let F = new Point (2,4);
+  let G = new Point (3,3);
+  make3JSLoop (E,F,G,E);
+
+
+   let L1 = new BSPNode (A, B);
+      let L1b = L1.break (new Point(4,1.8)); 
+      let L1a = L1;
+   let L2 = new BSPNode (B, C);
+   let L3 = new BSPNode (C, D);
+	   let L3b = L3.break (new Point(2,5.2)); 
+	   let L3a = L3;
+   let L4 = new BSPNode (D, A);
+
+   let L5 = new BSPNode (E, F);
+   let L6 = new BSPNode (F, G);
+   let L7 = new BSPNode (G, E);
+   
+   // build BSP tree by hand (inorder traversal)
+   L5.setLeftChild (L3b);
+   L3b.setLeftChild (L4);
+
+   L5.setRightChild (L6);
+   L6.setLeftChild (L2);
+   L2.setLeftChild (L3a);
+   L3a.setLeftChild (L1b);
+
+   L6.setRightChild (L7);
+   L7.setLeftChild (L1a);
+
+   return L5;  // the root node
+}
+
+//
+// degenerate inner obstacle
+// does not work ...
+//
+function buildTree2 () {
+  // outer wall
+  let A = new Point (0,0);
+  let B = new Point (5,0);
+  let C = new Point (5,5);
+  let D = new Point (0,5);
+
+  make3JSLoop (A,B,C,D,A);    
+
+  let E = new Point (2,2);
+  let F = new Point (2,3);
+
+  make3JSLoop (E,F);
+      
+   let L1 = new BSPNode (A, B);
+	   let L1b = L1.break (new Point(2,0)); 
+	   let L1a = L1;
+   let L2 = new BSPNode (B, C);
+   let L3 = new BSPNode (C, D);
+	   let L3b = L3.break (new Point(2,5)); 
+	   let L3a = L3;
+   let L4 = new BSPNode (D, A);
+
+   let L5 = new BSPNode (E, F);
+   let L6 = new BSPNode (F, E);
+   
+// build BSP tree by hand (inorder traversal)
+   L5.setLeftChild (L3b);
+   L3b.setLeftChild (L4);   
+   L4.setLeftChild (L1a);
+
+   L5.setRightChild (L6);
+   L6.setLeftChild (L2);
+   L2.setLeftChild (L3a);
+   L3a.setLeftChild (L1b);
+
+   return L5;  // the root node
+}
+
+function inOut (x,y, node, r = 0) { // 半徑(r) default 為 0
+  
+   if (node.coeff[0]*x + node.coeff[1]*y + node.coeff[2] > r) {
+       if (node.leftChild === null )
+       	  return 0; // free
+       else
+          return inOut (x,y, node.leftChild, r);
+   } else { // <= 0
+       if (node.rightChild === null)
+          return 1; // solid
+       else
+          return inOut (x,y, node.rightChild, r);
+   }
+   	  
+}
+
+
+
+function init() {
+
+  renderer = new THREE.WebGLRenderer({
+    antialias: true
+  });
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.OrthographicCamera(-2, 8, 8, -2, -10, 100);
+  camera.position.z = 10;
+
+  let grid = new THREE.GridHelper(16,16,'red','white');
+  grid.rotation.x = -Math.PI/2
+  scene.add (grid);
+
+  keyboard = new KeyboardState();
+
+  /////////////////////////////////////////////////////////
+
+  tree = buildTree();
+
+  // pawn:
+  RR = 0.2;  // pawn size
+  pawn = new THREE.Mesh (new THREE.CircleGeometry(RR,20), 
+         new THREE.MeshBasicMaterial({color:'cyan'}));
+  scene.add (pawn);
+  
+  pawn.position.set (4, 4);
+  
+}
+
+function animate() {
+
+  keyboard.update();
+  
+  if (keyboard.pressed('up')) {
+    if (state!=1)
+    	pawn.position.y += 0.1;
+    
+	state = inOut (pawn.position.x, pawn.position.y+0.1, tree, RR);
+  } 
+  
+  if (keyboard.pressed('down')) {
+    if (state!=1)
+    	pawn.position.y -= 0.1;
+    
+	state = inOut (pawn.position.x, pawn.position.y-0.1, tree, RR);
+  } 
+
+  if (keyboard.pressed('left')) { 
+  	if (state!=1)
+    	pawn.position.x -= 0.1;
+		
+    state = inOut (pawn.position.x-0.1, pawn.position.y, tree, RR);
+  }
+  if (keyboard.pressed('right')) {
+    if (state!=1)
+    	pawn.position.x += 0.1;
+		
+    state = inOut (pawn.position.x+0.1, pawn.position.y, tree, RR);
+  } 
+  
+  if (state === 1) { // solid
+  	pawn.material.color = new THREE.Color ('red');
+  } else {
+  	pawn.material.color = new THREE.Color ('cyan');  
+  }
+  
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+  
+}
+
+</script>
+</body>
+</html>
